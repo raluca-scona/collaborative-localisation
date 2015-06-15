@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+
+import sys
+import rospy
+import math
+import numpy;
+import random;
+from multi_robot_localisation.srv import *
+from multi_robot_localisation.msg import *
+from geometry_msgs.msg import Pose, Point, Quaternion, Twist
+from nav_msgs.msg import Odometry
+from std_msgs.msg import String
+
+usbl = None
+robot = None
+seaDepth = 30;
+
+def setRobot(data):
+    position = data.pose.pose.position
+    global robot 
+    robot = numpy.array([position.x, position.y, position.z]);
+      
+def setUSBL(data):
+    position = data.pose.pose.position
+    global usbl 
+    usbl = numpy.array([position.x, position.y, position.z]);
+    
+def euclideanDistance(a, b):
+    return numpy.linalg.norm(a - b);
+    
+def getCosBetweenTwoVectors(a, b):
+    if (a[0] == b[0] and a[1] == b[1]):
+        return numpy.cos(0)
+    dist = euclideanDistance(a, b);
+    depthDifference = a[2] - b[2];
+    return (b[1] - a[1]) / math.sqrt(dist**2 - depthDifference**2)
+    
+def getSinBetweenTwoVectors(a, b):
+    if (a[0] == b[0] and a[1] == b[1]):
+        return numpy.sin(0)
+    dist = euclideanDistance(a, b);
+    depthDifference = a[2] - b[2];
+    return (b[0] - a[0]) / math.sqrt(dist**2 - depthDifference**2)   
+    
+def getUSBLReading():
+    pub = rospy.Publisher('/uwsim/usbl_AZOR', USBL, queue_size=10)
+    rospy.init_node('usbl_AZOR', anonymous=True)
+    
+    rospy.Subscriber("/uwsim/odom_AZOR", Odometry, setRobot)
+    rospy.Subscriber("/uwsim/odom_TOP", Odometry, setUSBL)
+    
+    rate = rospy.Rate(10) # 10hz
+    while not rospy.is_shutdown():
+        if (usbl != None and robot != None):
+            dist = euclideanDistance(usbl, robot)
+
+            bearingCos = getCosBetweenTwoVectors(usbl, robot)
+            bearingSin = getSinBetweenTwoVectors(usbl, robot)
+            bearing = numpy.arctan2(bearingSin, bearingCos)
+            
+            rospy.loginfo(USBL(Distance(dist), Bearing(bearing)))
+            pub.publish(USBL(Distance(dist), Bearing(bearing)))
+            
+            rate.sleep()
+    rospy.spin()
+
+if __name__ == '__main__':
+    try:
+        getUSBLReading()
+    except rospy.ROSInterruptException:
+        pass
