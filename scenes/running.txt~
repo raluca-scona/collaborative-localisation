@@ -1,4 +1,0 @@
-rosrun uwsim uwsim --configfile threerobots.xml
-rosrun uwsim setVehicleVelocity /dataNavigator_G500TOP 0.1 0 0 0 0 0
-rostopic echo /uwsim/girona500_odom_TOP
-rostopic echo /dataNavigator_G500TOP

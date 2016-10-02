@@ -1,9 +1,0 @@
-geometry_msgs/Point lblLocation1
-geometry_msgs/Point lblLocation2
-LBL dist1
-LBL dist2
-Distance robotDepth01
----
-geometry_msgs/Point point1
-geometry_msgs/Point point2
-

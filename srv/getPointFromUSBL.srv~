@@ -1,6 +1,0 @@
-geometry_msgs/Point usblLocation
-Distance depthDifference
-USBL usbl
----
-geometry_msgs/Point point
-

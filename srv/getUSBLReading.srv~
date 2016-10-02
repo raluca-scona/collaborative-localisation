@@ -1,4 +1,0 @@
-geometry_msgs/Point usblLocation
-geometry_msgs/Point point
----
-USBL usbl
